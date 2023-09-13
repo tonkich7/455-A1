@@ -288,64 +288,28 @@ class GtpConnection:
     """
     def gogui_rules_final_result_cmd(self, args: List[str]) -> None:
         """ Implement this function for Assignment 1 """
-        self.respond("Not implemented")
+        self.respond("unknown")
 
     def gogui_rules_legal_moves_cmd(self, args: List[str]) -> None:
         """ Implement this function for Assignment 1 """
-        '''
-        fix this function asap, this is sending error to the gui currently
-        can click on the board (error pops) but shows the move # and location of board where clicked
-        '''
-        # what are args? its an empty list if called
-        # print(args)
-
-        # self.respond("gogui_rules_legal_moves_cmd called")
-
-        # board_color = args[0].lower()
-        # color = color_to_int(board_color)
-        # moves = GoBoardUtil.generate_legal_moves(self.board, color)
-        # gtp_moves = [format_point(point_to_coord(move, self.board.size)) for move in moves]
-        # sorted_moves = " ".join(sorted(gtp_moves))
- 
+        self.respond()
 
     def play_cmd(self, args: List[str]) -> None:
         """
         Modify this function for Assignment 1.
         play a move args[1] for given color args[0] in {'b','w'}.
-        determine color first, see if playable, then coordinate
         """
-        self.respond("play_cmd was called: {}".format(args))
-    
         try:
             board_color = args[0].lower()
             board_move = args[1]
-            self.respond("board color:{}".format(board_color))
-            
-            # determine the color
-            if board_color == 'b' or board_color == 'w':
-                color = color_to_int(board_color)
-                self.respond('color as int:{}'.format(color))
-            else:
-                self.respond("Illegal Move: Wrong color {}".format(board_color))
-                return 
-
+            color = color_to_int(board_color)
             if args[1].lower() == "pass":
                 self.board.play_move(PASS, color)
                 self.board.current_player = opponent(color)
                 self.respond()
                 return
-
-            try:
-                coord = move_to_coord(args[1], self.board.size)
-                move = coord_to_point(coord[0], coord[1], self.board.size)
-                
-                self.respond('coord {} and move {}'.format(coord,move))
-            except Exception as e:
-                self.respond("Exception at",e )
-                return 
-            
-            # move = coord_to_point(coord[0], coord[1], self.board.size)
-
+            coord = move_to_coord(args[1], self.board.size)
+            move = coord_to_point(coord[0], coord[1], self.board.size)
             if not self.board.play_move(move, color):
                 self.respond("Illegal Move: {}".format(board_move))
                 return
