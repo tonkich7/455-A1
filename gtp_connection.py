@@ -288,11 +288,23 @@ class GtpConnection:
     """
     def gogui_rules_final_result_cmd(self, args: List[str]) -> None:
         """ Implement this function for Assignment 1 """
-        self.respond("unknown")
+        self.respond("Game is finished")
 
     def gogui_rules_legal_moves_cmd(self, args: List[str]) -> None:
         """ Implement this function for Assignment 1 """
-        self.respond()
+        try:
+            board_color: str = args[0].lower()
+            color: GO_COLOR = color_to_int(board_color)
+            moves: List[GO_POINT] = GoBoardUtil.generate_legal_moves(self.board, color)
+            gtp_moves: List[str] = []
+            for move in moves:
+                coords: Tuple[int, int] = point_to_coord(move, self.board.size)
+                gtp_moves.append(format_point(coords))
+            sorted_moves = " ".join(sorted(gtp_moves))
+            self.respond(sorted_moves)
+        except Exception as e:
+            self.respond("Error: {}".format(str(e)))
+
 
     def play_cmd(self, args: List[str]) -> None:
         """
@@ -310,14 +322,11 @@ class GtpConnection:
                 return
             coord = move_to_coord(args[1], self.board.size)
             move = coord_to_point(coord[0], coord[1], self.board.size)
-            if not self.board.play_move(move, color):
-                self.respond("Illegal Move: {}".format(board_move))
-                return
+            if self.board.is_legal(move, color):
+                self.board.play_move(move, color)
+                self.respond("OK")
             else:
-                self.debug_msg(
-                    "Move: {}\nBoard:\n{}\n".format(board_move, self.board2d())
-                )
-            self.respond()
+                self.respond("illegal move: {}".format(board_move))
         except Exception as e:
             self.respond("Error: {}".format(str(e)))
 

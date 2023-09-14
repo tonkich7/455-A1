@@ -100,8 +100,8 @@ class GoBoard(object):
         assert is_black_white_empty(self.board[point])
         if self.board[point] != EMPTY:
             return False
-        if point == self.ko_recapture:
-            return False
+        # if point == self.ko_recapture:
+        #     return False
         return True
 
     def is_legal(self, point: GO_POINT, color: GO_COLOR) -> bool:
@@ -117,8 +117,7 @@ class GoBoard(object):
         return can_play_move
 
     def end_of_game(self) -> bool:
-        return self.last_move == PASS \
-           and self.last2_move == PASS
+        return False
            
     def get_empty_points(self) -> np.ndarray:
         """
@@ -243,23 +242,23 @@ class GoBoard(object):
             return True
 
         # General case: deal with captures, suicide, and next ko point
-        opp_color = opponent(color)
-        in_enemy_eye = self._is_surrounded(point, opp_color)
+        # opp_color = opponent(color)
+        # in_enemy_eye = self._is_surrounded(point, opp_color)
         self.board[point] = color
-        single_captures = []
-        neighbors = self._neighbors(point)
-        for nb in neighbors:
-            if self.board[nb] == opp_color:
-                single_capture = self._detect_and_process_capture(nb)
-                if single_capture != NO_POINT:
-                    single_captures.append(single_capture)
-        block = self._block_of(point)
-        if not self._has_liberty(block):  # undo suicide move
-            self.board[point] = EMPTY
-            return False
-        self.ko_recapture = NO_POINT
-        if in_enemy_eye and len(single_captures) == 1:
-            self.ko_recapture = single_captures[0]
+        # single_captures = []
+        # neighbors = self._neighbors(point)
+        # for nb in neighbors:
+        #     if self.board[nb] == opp_color:
+        #         single_capture = self._detect_and_process_capture(nb)
+        #         if single_capture != NO_POINT:
+        #             single_captures.append(single_capture)
+        # block = self._block_of(point)
+        # if not self._has_liberty(block):  # undo suicide move
+        #     self.board[point] = EMPTY
+        #     return False
+        # self.ko_recapture = NO_POINT
+        # if in_enemy_eye and len(single_captures) == 1:
+        #     self.ko_recapture = single_captures[0]
         self.current_player = opponent(color)
         self.last2_move = self.last_move
         self.last_move = point
