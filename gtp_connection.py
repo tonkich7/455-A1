@@ -309,9 +309,13 @@ class GtpConnection:
                 self.respond()
                 return
             coord = move_to_coord(args[1], self.board.size)
-            move = coord_to_point(coord[0], coord[1], self.board.size)
+            if coord:
+                move = coord_to_point(coord[0], coord[1], self.board.size)
+            else:
+                self.respond("unknown: {}".format(args[1]))
+                return
             if not self.board.play_move(move, color):
-                self.respond("Illegal Move: {}".format(board_move))
+                self.respond("illegal move: \"{}\" occupied".format(args[1].lower()))
                 return
             else:
                 self.debug_msg(
@@ -319,7 +323,7 @@ class GtpConnection:
                 )
             self.respond()
         except Exception as e:
-            self.respond("Error: {}".format(str(e)))
+            self.respond("illegal move: {}".format(str(e).replace('\'','')))
 
     def genmove_cmd(self, args: List[str]) -> None:
         """ 
