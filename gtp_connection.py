@@ -222,7 +222,7 @@ class GtpConnection:
         """
         board_color: str = args[0].lower()
         color: GO_COLOR = color_to_int(board_color)
-        moves: List[GO_POINT] = GoBoardUtil.generate_legal_moves(self.board, color)
+        moves: List[GO_POINT] = self.board.get_empty_points()
         gtp_moves: List[str] = []
         for move in moves:
             coords: Tuple[int, int] = point_to_coord(move, self.board.size)
@@ -297,8 +297,14 @@ class GtpConnection:
         if self.board.end_of_game():
             return
         else:
-            self.respond(self.board.get_empty_points())
-            return self.board.get_empty_points()
+            moves: List[GO_POINT] = self.board.get_empty_points()
+            gtp_moves: List[str] = []
+            for move in moves:
+                coords: Tuple[int, int] = point_to_coord(move, self.board.size)
+                gtp_moves.append(format_point(coords))
+            sorted_moves = " ".join(sorted(gtp_moves))
+            self.respond(sorted_moves)
+            return sorted_moves
         
 
     def play_cmd(self, args: List[str]) -> None:
