@@ -54,6 +54,9 @@ class GoBoard(object):
         """
         Creates a start state, an empty board with given size.
         """
+        self.blackwin = False
+        self.whitewin = False
+        self.draw = False
         self.size: int = size
         self.NS: int = size + 1
         self.WE: int = 1
@@ -116,7 +119,10 @@ class GoBoard(object):
 
     def end_of_game(self) -> bool:
         # TEMPORARY FIX SO GAME IS NOT OVER ON START
-        return False
+        if self.blackwin or self.whitewin or self.draw:
+            return True
+        else:
+            return False
            
     def get_empty_points(self) -> np.ndarray:
         """

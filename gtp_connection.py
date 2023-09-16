@@ -24,6 +24,7 @@ from board_base import (
     MAXSIZE,
     is_black_white,
     coord_to_point,
+    is_black_white_empty,
     opponent
 )
 from board import GoBoard
@@ -293,7 +294,12 @@ class GtpConnection:
 
     def gogui_rules_legal_moves_cmd(self, args: List[str]) -> None:
         """ Implement this function for Assignment 1 """
-        self.respond()
+        if self.board.end_of_game():
+            return
+        else:
+            self.respond(self.board.get_empty_points())
+            return self.board.get_empty_points()
+        
 
     def play_cmd(self, args: List[str]) -> None:
         """
@@ -303,20 +309,20 @@ class GtpConnection:
         try:
             board_color = args[0].lower()
             board_move = args[1]
+            assert board_color.lower() in {'b','w'}, "wrong color"
             color = color_to_int(board_color)
             coord = move_to_coord(args[1], self.board.size)
             move = coord_to_point(coord[0], coord[1], self.board.size)
             if not self.board.play_move(move, color):
-                reason = "" 
-                if not is_black_white(color):
-                    reason = "wrong color"
-                self.respond("Illegal Move: {}, {}".format(board_move, reason))
+                self.respond("Illegal Move: {}, occupied".format(args)) #temporary
                 return
             else:
                 self.debug_msg(
                     "Move: {}\nBoard:\n{}\n".format(board_move, self.board2d())
                 )
             self.respond()
+        except AssertionError as ae:
+            self.respond("Illegal move: {}, {}".format(args, str(ae)))
         except Exception as e:
             self.respond("Error: {}".format(str(e)))
 
