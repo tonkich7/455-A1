@@ -22,6 +22,7 @@ from board_base import (
     GO_COLOR, GO_POINT,
     PASS,
     MAXSIZE,
+    is_black_white,
     coord_to_point,
     opponent
 )
@@ -303,15 +304,13 @@ class GtpConnection:
             board_color = args[0].lower()
             board_move = args[1]
             color = color_to_int(board_color)
-            if args[1].lower() == "pass":
-                self.board.play_move(PASS, color)
-                self.board.current_player = opponent(color)
-                self.respond()
-                return
             coord = move_to_coord(args[1], self.board.size)
             move = coord_to_point(coord[0], coord[1], self.board.size)
             if not self.board.play_move(move, color):
-                self.respond("Illegal Move: {}".format(board_move))
+                reason = "" 
+                if not is_black_white(color):
+                    reason = "wrong color"
+                self.respond("Illegal Move: {}, {}".format(board_move, reason))
                 return
             else:
                 self.debug_msg(
