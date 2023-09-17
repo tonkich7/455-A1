@@ -47,15 +47,10 @@ class GoBoardUtil(object):
             the color to generate the move for.
         """
         moves: np.ndarray[GO_POINT] = board.get_empty_points()
+        if len(moves) == 0:
+            return PASS
         np.random.shuffle(moves)
-        for move in moves:
-            legal: bool = not (
-                use_eye_filter and board.is_eye(move, color)
-            ) and board.is_legal(move, color)
-            if legal:
-                return move
-        return PASS
-
+        return moves[0]
     @staticmethod
     def generate_random_moves(board: GoBoard, use_eye_filter: bool) -> List:
         """

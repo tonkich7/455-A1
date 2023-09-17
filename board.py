@@ -54,9 +54,6 @@ class GoBoard(object):
         """
         Creates a start state, an empty board with given size.
         """
-        self.blackwin = False
-        self.whitewin = False
-        self.draw = False
         self.size: int = size
         self.NS: int = size + 1
         self.WE: int = 1
@@ -94,15 +91,17 @@ class GoBoard(object):
         If this function returns True: still need to check more
         complicated cases such as suicide.
         """
-        assert is_black_white(color), "wrong color"
+        assert is_black_white(color)
         if point == PASS:
             return True
         # Could just return False for out-of-bounds, 
         # but it is better to know if this is called with an illegal point
-        assert self.pt(1, 1) <= point <= self.pt(self.size, self.size), "point not in range"
-        assert is_black_white_empty(self.board[point]), "point is occupied"
+        assert self.pt(1, 1) <= point <= self.pt(self.size, self.size)
+        assert is_black_white_empty(self.board[point])
         if self.board[point] != EMPTY:
             return False
+        # if point == self.ko_recapture:
+        #     return False
         return True
 
     def is_legal(self, point: GO_POINT, color: GO_COLOR) -> bool:
@@ -118,11 +117,7 @@ class GoBoard(object):
         return can_play_move
 
     def end_of_game(self) -> bool:
-        # TEMPORARY FIX SO GAME IS NOT OVER ON START
-        if self.blackwin or self.whitewin or self.draw:
-            return True
-        else:
-            return False
+        return False
            
     def get_empty_points(self) -> np.ndarray:
         """
@@ -240,6 +235,7 @@ class GoBoard(object):
             return False
         # Special cases
         if point == PASS:
+            self.ko_recapture = NO_POINT
             self.current_player = opponent(color)
             self.last2_move = self.last_move
             self.last_move = point
@@ -247,8 +243,7 @@ class GoBoard(object):
         elif self.board[point] != EMPTY:
             return False
 
-        # General case: deal with captures
-        # !!!! IMPLEMENT NEW CAPTURE FOR NINUKI
+        # General case: deal with captures, suicide, and next ko point
         # opp_color = opponent(color)
         # in_enemy_eye = self._is_surrounded(point, opp_color)
         self.board[point] = color
@@ -259,6 +254,11 @@ class GoBoard(object):
         #         single_capture = self._detect_and_process_capture(nb)
         #         if single_capture != NO_POINT:
         #             single_captures.append(single_capture)
+        # block = self._block_of(point)
+        # if not self._has_liberty(block):  # undo suicide move
+        #     self.board[point] = EMPTY
+        #     return False
+        # self.ko_recapture = NO_POINT
         # if in_enemy_eye and len(single_captures) == 1:
         #     self.ko_recapture = single_captures[0]
         self.current_player = opponent(color)
