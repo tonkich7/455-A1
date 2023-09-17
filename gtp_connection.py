@@ -22,7 +22,9 @@ from board_base import (
     GO_COLOR, GO_POINT,
     PASS,
     MAXSIZE,
+    is_black_white,
     coord_to_point,
+    is_black_white_empty,
     opponent
 )
 from board import GoBoard
@@ -220,7 +222,7 @@ class GtpConnection:
         """
         board_color: str = args[0].lower()
         color: GO_COLOR = color_to_int(board_color)
-        moves: List[GO_POINT] = GoBoardUtil.generate_legal_moves(self.board, color)
+        moves: List[GO_POINT] = self.board.get_empty_points()
         gtp_moves: List[str] = []
         for move in moves:
             coords: Tuple[int, int] = point_to_coord(move, self.board.size)
@@ -300,19 +302,18 @@ class GtpConnection:
 
     def gogui_rules_legal_moves_cmd(self, args: List[str]) -> None:
         """ Implement this function for Assignment 1 """
-        try:
-            board_color: str = args[0].lower()
-            color: GO_COLOR = color_to_int(board_color)
-            moves: List[GO_POINT] = GoBoardUtil.generate_legal_moves(self.board, color)
+        if self.board.end_of_game():
+            return
+        else:
+            moves: List[GO_POINT] = self.board.get_empty_points()
             gtp_moves: List[str] = []
             for move in moves:
                 coords: Tuple[int, int] = point_to_coord(move, self.board.size)
                 gtp_moves.append(format_point(coords))
             sorted_moves = " ".join(sorted(gtp_moves))
             self.respond(sorted_moves)
-        except Exception as e:
-            self.respond("Error: {}".format(str(e)))
-
+            return sorted_moves
+        
 
     def play_cmd(self, args: List[str]) -> None:
         """
@@ -322,19 +323,20 @@ class GtpConnection:
         try:
             board_color = args[0].lower()
             board_move = args[1]
+            assert board_color.lower() in {'b','w'}, "wrong color"
             color = color_to_int(board_color)
-            if args[1].lower() == "pass":
-                self.board.play_move(PASS, color)
-                self.board.current_player = opponent(color)
-                self.respond()
-                return
             coord = move_to_coord(args[1], self.board.size)
             move = coord_to_point(coord[0], coord[1], self.board.size)
-            if self.board.is_legal(move, color):
-                self.board.play_move(move, color)
-                self.respond("OK")
+            if not self.board.play_move(move, color):
+                self.respond("Illegal Move: {}, occupied".format(args)) #temporary
+                return
             else:
-                self.respond("illegal move: {}".format(board_move))
+                self.debug_msg(
+                    "Move: {}\nBoard:\n{}\n".format(board_move, self.board2d())
+                )
+            self.respond()
+        except AssertionError as ae:
+            self.respond("Illegal move: {}, {}".format(args, str(ae)))
         except Exception as e:
             self.respond("illegal move: {}".format(str(e).replace('\'','')))
 
