@@ -287,8 +287,16 @@ class GtpConnection:
     ==========================================================================
     """
     def gogui_rules_final_result_cmd(self, args: List[str]) -> None:
-        """ Implement this function for Assignment 1 """
-        self.respond("Game is finished")
+        if self.board.get_empty_points().size == 0:
+            self.respond("draw")
+            return
+        result = self.board.detect_five()
+        if result == BLACK:
+            self.respond("black")
+        elif result == WHITE:
+            self.respond("white")
+        else:
+            self.respond("unknown")
 
     def gogui_rules_legal_moves_cmd(self, args: List[str]) -> None:
         """ Implement this function for Assignment 1 """
@@ -335,6 +343,13 @@ class GtpConnection:
         Modify this function for Assignment 1.
         Generate a move for color args[0] in {'b','w'}.
         """
+        result = self.board.detect_five()
+        if result == opponent(self.board.current_player):
+            self.respond("resign")
+            return
+        if self.board.get_empty_points().size == 0:
+            self.respond("pass")
+            return
         board_color = args[0].lower()
         color = color_to_int(board_color)
         move = self.go_engine.get_move(self.board, color)
@@ -417,4 +432,39 @@ def move_to_coord(point_str: str, board_size: int) -> Tuple[int, int]:
 def color_to_int(c: str) -> int:
     """convert character to the appropriate integer code"""
     color_to_int = {"b": BLACK, "w": WHITE, "e": EMPTY, "BORDER": BORDER}
-    return color_to_int[c]
+    try:
+        return color_to_int[c]
+    except:
+        raise KeyError("\"{}\" wrong color".format(c))
+    
+
+def detect_five(self):
+        """
+        Returns black, white or empty if five is detected in any directions
+        """
+        for r in self.rows:
+            result = self.has_five_in_list(r)
+            if result != EMPTY:
+                return result
+        for c in self.cols:
+            result = self.has_five_in_list(c)
+            if result != EMPTY:
+                return result
+        for d in self.diags:
+            result = self.has_five_in_list(d)
+            if result != EMPTY:
+                return result
+        return EMPTY
+
+def has_five_in_list(self, list):
+        previous = BORDER
+        counter = 1
+        for stone in list:
+            if self.get_color(stone) == previous:
+                counter += 1
+            else:
+                counter = 1
+                prev = self.get_color(stone)
+            if counter == 5 and previous != EMPTY:
+                return previous
+        return EMPTY

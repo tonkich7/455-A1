@@ -240,6 +240,8 @@ class GoBoard(object):
             self.last2_move = self.last_move
             self.last_move = point
             return True
+        elif self.board[point] != EMPTY:
+            return False
 
         # General case: deal with captures, suicide, and next ko point
         # opp_color = opponent(color)
