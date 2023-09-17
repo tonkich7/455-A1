@@ -294,3 +294,7 @@ class GoBoard(object):
         if self.last2_move != NO_POINT and self.last2_move != PASS:
             board_moves.append(self.last2_move)
         return board_moves
+
+
+
+

@@ -22,6 +22,7 @@ from board_base import (
     GO_COLOR, GO_POINT,
     PASS,
     MAXSIZE,
+    DEFAULT_SIZE,
     is_black_white,
     coord_to_point,
     is_black_white_empty,
@@ -312,25 +313,67 @@ class GtpConnection:
         Modify this function for Assignment 1.
         play a move args[1] for given color args[0] in {'b','w'}.
         """
+
         try:
             board_color = args[0].lower()
             board_move = args[1]
-            assert board_color.lower() in {'b','w'}, "wrong color"
             color = color_to_int(board_color)
+            opp_color = opponent(color)
+
+            if args[1].lower() == "pass":
+                self.board.play_move(PASS, color)
+                self.board.current_player = opp_color  # Switch to opponent's turn
+                self.respond()
+                return
+
             coord = move_to_coord(args[1], self.board.size)
             move = coord_to_point(coord[0], coord[1], self.board.size)
-            if not self.board.play_move(move, color):
-                self.respond("Illegal Move: {}, occupied".format(args)) #temporary
-                return
+
+            if self.board.is_legal(move, color):
+                self.board.play_move(move, color)
+                self.respond("{} played {}, coord {}".format(board_color, board_move, coord))
+
+                # VERTICAL + HORIZ CAPTURES
+                neighbours_list = self.board._neighbors(move)
+
+                # row_col_captures(neighbours_list, self.board, color, opp_color)
+
+                points_to_capture = []
+                for neighbours in neighbours_list:
+
+                    if self.board.get_color(neighbours) == opp_color:
+                        new_idx = neighbours_list.index(neighbours)
+                        new_nb_list = self.board._neighbors(neighbours)
+                        points_to_capture.append(neighbours_list[new_idx])
+
+                        # Check for the next neighbor of the same color
+                        if self.board.get_color(new_nb_list[new_idx]) == opp_color:
+                            sec_nb_list = self.board._neighbors(new_nb_list[new_idx])
+                            points_to_capture.append(new_nb_list[new_idx])
+
+                            # Check if the second neighbor has the same color as the current player
+
+                            if self.board.get_color(sec_nb_list[new_idx]) == color:
+                                # Process capture
+                                # points_to_capture = [new_nb_list[new_idx], neighbours_list[new_idx]]
+                                print(("points to be captured: {}".format(points_to_capture)))
+
+                                #TODO: process capture 
+                           
+                                
+
+                # print(points_to_capture)
+                
+                
+
+
             else:
-                self.debug_msg(
-                    "Move: {}\nBoard:\n{}\n".format(board_move, self.board2d())
-                )
-            self.respond()
-        except AssertionError as ae:
-            self.respond("Illegal move: {}, {}".format(args, str(ae)))
+                self.respond("illegal move: {}".format(board_move))
+
         except Exception as e:
             self.respond("Error: {}".format(str(e)))
+
+
 
     def genmove_cmd(self, args: List[str]) -> None:
         """ 
@@ -420,3 +463,54 @@ def color_to_int(c: str) -> int:
     """convert character to the appropriate integer code"""
     color_to_int = {"b": BLACK, "w": WHITE, "e": EMPTY, "BORDER": BORDER}
     return color_to_int[c]
+
+
+
+
+'''HELPER FUNCTIONS'''
+
+def row_col_captures(neighbours_list, board, color, opp_color) -> List:
+    points_to_capture = []
+    for neighbours in neighbours_list:
+
+        if board.get_color(neighbours) == opp_color:
+            new_idx = neighbours_list.index(neighbours)
+            new_nb_list = board._neighbors(neighbours)
+            points_to_capture.append(neighbours_list[new_idx])
+
+            # Check for the next neighbor of the same color
+            if board.get_color(new_nb_list[new_idx]) == opp_color:
+                sec_nb_list = board._neighbors(new_nb_list[new_idx])
+                points_to_capture.append(new_nb_list[new_idx])
+
+                # Check if the second neighbor has the same color as the current player
+
+                if board.get_color(sec_nb_list[new_idx]) == color:
+                    # Process capture
+                    points_to_capture = [new_nb_list[new_idx], neighbours_list[new_idx]]
+                    print(("points to be captured: {}".format(points_to_capture)))
+                    return points_to_capture
+    return None
+
+
+
+
+'''
+                # for neighbours in neighbours_list:
+
+                #     if self.board.get_color(neighbours) == opp_color:
+                #         new_idx = neighbours_list.index(neighbours)
+                #         new_nb_list = self.board._neighbors(neighbours)
+                #         points_to_capture.append(neighbours_list[new_idx])
+
+                #         while self.board.get_color(new_nb_list[new_idx]) == opp_color:
+                #             sec_nb_list = self.board._neighbors(new_nb_list[new_idx])
+                #             points_to_capture.append(new_nb_list[new_idx])
+                #             new_nb_list = sec_nb_list
+
+                #             if self.board.get_color(sec_nb_list[new_idx]) == color:    
+                #                 self.respond("found a capture")
+                #                 self.respond("points to be captured: {}".format(points_to_capture))
+                #                 break
+
+'''
