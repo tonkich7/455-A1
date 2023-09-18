@@ -333,7 +333,6 @@ class GoBoard(object):
         points_to_capture = []
         nb_list = self._neighbors(point)
         nb_list.extend(self._diag_neighbors(point))
-        print(nb_list)
 
 
         for nb in nb_list:
@@ -363,7 +362,6 @@ class GoBoard(object):
                         # points_to_capture = [new_nb_list[new_idx], neighbours_list[new_idx]]
                         #print(("points to be captured: {}".format(points_to_capture)))
                         #TODO: process capture 
-                        print(("process capture: {}".format(points_to_capture)))
                         
                     
                         self.board[points_to_capture] = EMPTY # make captured point empty
