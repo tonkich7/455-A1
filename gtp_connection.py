@@ -303,8 +303,7 @@ class GtpConnection:
     def gogui_rules_legal_moves_cmd(self, args: List[str]) -> None:
         """ Implement this function for Assignment 1 """
         if self.board.end_of_game():
-            self.respond("{}".format([]))
-            return []
+            return
         else:
             moves: List[GO_POINT] = self.board.get_empty_points()
             gtp_moves: List[str] = []
