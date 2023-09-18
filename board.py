@@ -122,6 +122,10 @@ class GoBoard(object):
         """
         Creates a start state, an empty board with given size.
         """
+        self.blackscore = 0
+        self.whitescore = 0
+        self.draw = False
+        self.winner = EMPTY
         self.size: int = size
         self.NS: int = size + 1
         self.WE: int = 1
@@ -163,14 +167,14 @@ class GoBoard(object):
         assert is_black_white(color)
         if point == PASS:
             return True
+        if self.end_of_game():
+            return False
         # Could just return False for out-of-bounds, 
         # but it is better to know if this is called with an illegal point
         assert self.pt(1, 1) <= point <= self.pt(self.size, self.size)
         assert is_black_white_empty(self.board[point])
         if self.board[point] != EMPTY:
             return False
-        # if point == self.ko_recapture:
-        #     return False
         return True
 
     def is_legal(self, point: GO_POINT, color: GO_COLOR) -> bool:
@@ -186,9 +190,15 @@ class GoBoard(object):
         return can_play_move
 
     def end_of_game(self) -> bool:
-        return self.last_move == PASS \
-        and self.last2_move == PASS
-           
+        if self.get_empty_points().size == 0:
+            return True
+        elif self.blackscore >= 10 or self.whitescore >= 10:
+            return True
+        elif self.detect_five() != EMPTY:
+            return True
+        else:
+            return False
+            
     def get_empty_points(self) -> np.ndarray:
         """
         Return:
@@ -340,7 +350,12 @@ class GoBoard(object):
                         # points_to_capture = [new_nb_list[new_idx], neighbours_list[new_idx]]
                         #print(("points to be captured: {}".format(points_to_capture)))
                         #TODO: process capture 
-                        self.board[points_to_capture] = EMPTY
+                        
+                        self.board[points_to_capture] = EMPTY # make captured point empty
+                        if color == WHITE:
+                            self.whitescore += len(points_to_capture)
+                        elif color == BLACK:
+                            self.blackscore += len(points_to_capture)
                            
                                 
 
@@ -397,6 +412,7 @@ class GoBoard(object):
         if self.last2_move != NO_POINT and self.last2_move != PASS:
             board_moves.append(self.last2_move)
         return board_moves
+    
     def detect_five(self):
         """
         Returns black, white or empty if five is detected in any directions
