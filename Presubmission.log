@@ -1,0 +1,39 @@
+Script started on 2023-09-18 15:36:53-06:00 [TERM="xterm-256color" TTY="/dev/pts/2" COLUMNS="92" LINES="24"]
+ydong4@ohaton:~/CMPUT455>cp assignment1.tf[Kgz test
+ydong4@ohaton:~/CMPUT455>tar -xvzf assignment[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[Kcd test
+ydong4@ohaton:~/CMPUT455/test>tar -xvzf assignment1.tgz
+assignment1/
+assignment1/board.py
+assignment1/engine.py
+assignment1/board_util.py
+assignment1/Go0.py
+assignment1/gtp_connection.py
+assignment1/board_base.py
+assignment1/__pycache__/
+assignment1/__pycache__/board.cpython-39.pyc
+assignment1/__pycache__/gtp_connection.cpython-310.pyc
+assignment1/__pycache__/board_util.cpython-310.pyc
+assignment1/__pycache__/engine.cpython-310.pyc
+assignment1/__pycache__/engine.cpython-39.pyc
+assignment1/__pycache__/board_util.cpython-311.pyc
+assignment1/__pycache__/engine.cpython-311.pyc
+assignment1/__pycache__/gtp_connection.cpython-311.pyc
+assignment1/__pycache__/board.cpython-310.pyc
+assignment1/__pycache__/board_util.cpython-39.pyc
+assignment1/__pycache__/board_base.cpython-39.pyc
+assignment1/__pycache__/board_base.cpython-311.pyc
+assignment1/__pycache__/gtp_connection.cpython-39.pyc
+assignment1/__pycache__/board.cpython-311.pyc
+assignment1/__pycache__/board_base.cpython-310.pyc
+assignment1/assignment1-public-tests.gtp
+ydong4@ohaton:~/CMPUT455/test>gogui-regress ./Go0.py assignment1-public-tests.gtp
+File not found: assignment1-public-tests.gtp
+ydong4@ohaton:~/CMPUT455/test>cd assignment [K1
+ydong4@ohaton:~/CMPUT455/test/assignment1>cd assignment1gogui-regress ./Go0.py assignment1-public-tests.gtp
+Cannot run program "/cshome/ydong4/CMPUT455/test/assignment1/./Go0.py" (in directory "/cshome/ydong4/CMPUT455/test/assignment1"): error=13, Permission denied
+ydong4@ohaton:~/CMPUT455/test/assignment1>chmod +x Go0.py
+ydong4@ohaton:~/CMPUT455/test/assignment1>chmod +x Go0.pygogui-regress ./Go0.py assignment1-public-tests.gtp
+ydong4@ohaton:~/CMPUT455/test/assignment1>exit
+exit
+
+Script done on 2023-09-18 15:38:58-06:00 [COMMAND_EXIT_CODE="0"]
