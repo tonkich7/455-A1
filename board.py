@@ -336,12 +336,13 @@ class GoBoard(object):
             if self.get_color(nb) == opp_color:
                 new_idx = nb_list.index(nb)
                 new_nb_list = self._neighbors(nb)
-                points_to_capture.append(nb_list[new_idx])
+                # points_to_capture.append(nb_list[new_idx])
 
                 # Check for the next neighbor of the same color
                 if self.get_color(new_nb_list[new_idx]) == opp_color:
                     sec_nb_list = self._neighbors(new_nb_list[new_idx])
                     points_to_capture.append(new_nb_list[new_idx])
+                    points_to_capture.append(nb_list[new_idx])
 
                     # Check if the second neighbor has the same color as the current player
 
@@ -350,6 +351,7 @@ class GoBoard(object):
                         # points_to_capture = [new_nb_list[new_idx], neighbours_list[new_idx]]
                         #print(("points to be captured: {}".format(points_to_capture)))
                         #TODO: process capture 
+                        print(("process capture: {}".format(points_to_capture)))
                         
                         self.board[points_to_capture] = EMPTY # make captured point empty
                         if color == WHITE:
