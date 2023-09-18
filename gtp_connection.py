@@ -289,21 +289,22 @@ class GtpConnection:
     ==========================================================================
     """
     def gogui_rules_final_result_cmd(self, args: List[str]) -> None:
+        result = self.board.detect_five()
         if self.board.get_empty_points().size == 0:
             self.respond("draw")
             return
-        result = self.board.detect_five()
-        if result == BLACK:
-            self.respond("black")
-        elif result == WHITE:
-            self.respond("white")
+        elif self.board.blackscore >= 10 or result == BLACK:
+                self.respond("black")
+        elif self.board.whitescore >= 10 or result == WHITE:
+                self.respond("white")
         else:
             self.respond("unknown")
 
     def gogui_rules_legal_moves_cmd(self, args: List[str]) -> None:
         """ Implement this function for Assignment 1 """
         if self.board.end_of_game():
-            return
+            self.respond("{}".format([]))
+            return []
         else:
             moves: List[GO_POINT] = self.board.get_empty_points()
             gtp_moves: List[str] = []
@@ -368,7 +369,7 @@ class GtpConnection:
         Modify this function for Assignment 1.
         Respond with the score for white, an space, and the score for black.
         """
-        self.respond("0 0")
+        self.respond("{} {}".format(self.board.whitescore, self.board.blackscore))
 
     """
     ==========================================================================
