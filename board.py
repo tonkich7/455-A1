@@ -247,9 +247,40 @@ class GoBoard(object):
 
         # General case: deal with captures
         # !!!! IMPLEMENT NEW CAPTURE FOR NINUKI
+
+         # VERTICAL + HORIZ CAPTURES
+        opp_color = opponent(color)
+        self.board[point] = color
+
+        # row_col_captures(neighbours_list, self.board, color, opp_color)
+
+        points_to_capture = []
+        nb_list = self._neighbors(point)
+        for nb in nb_list:
+            if self.get_color(nb) == opp_color:
+                new_idx = nb_list.index(nb)
+                new_nb_list = self._neighbors(nb)
+                points_to_capture.append(nb_list[new_idx])
+
+                # Check for the next neighbor of the same color
+                if self.get_color(new_nb_list[new_idx]) == opp_color:
+                    sec_nb_list = self._neighbors(new_nb_list[new_idx])
+                    points_to_capture.append(new_nb_list[new_idx])
+
+                    # Check if the second neighbor has the same color as the current player
+
+                    if self.get_color(sec_nb_list[new_idx]) == color:
+                        # Process capture
+                        # points_to_capture = [new_nb_list[new_idx], neighbours_list[new_idx]]
+                        #print(("points to be captured: {}".format(points_to_capture)))
+                        #TODO: process capture 
+                        self.board[points_to_capture] = EMPTY
+                           
+                                
+
+                # print(points_to_capture)
         # opp_color = opponent(color)
         # in_enemy_eye = self._is_surrounded(point, opp_color)
-        self.board[point] = color
         # single_captures = []
         # neighbors = self._neighbors(point)
         # for nb in neighbors:
