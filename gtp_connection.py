@@ -440,33 +440,3 @@ def color_to_int(c: str) -> int:
         raise KeyError("\"{}\" wrong color".format(c))
     
 
-def detect_five(self):
-        """
-        Returns black, white or empty if five is detected in any directions
-        """
-        for r in self.rows:
-            result = self.has_five_in_list(r)
-            if result != EMPTY:
-                return result
-        for c in self.cols:
-            result = self.has_five_in_list(c)
-            if result != EMPTY:
-                return result
-        for d in self.diags:
-            result = self.has_five_in_list(d)
-            if result != EMPTY:
-                return result
-        return EMPTY
-
-def has_five_in_list(self, list):
-        previous = BORDER
-        counter = 1
-        for stone in list:
-            if self.get_color(stone) == previous:
-                counter += 1
-            else:
-                counter = 1
-                prev = self.get_color(stone)
-            if counter == 5 and previous != EMPTY:
-                return previous
-        return EMPTY
