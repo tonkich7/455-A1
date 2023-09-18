@@ -289,13 +289,14 @@ class GtpConnection:
     ==========================================================================
     """
     def gogui_rules_final_result_cmd(self, args: List[str]) -> None:
-        """ Implement this function for Assignment 1 """
-        if self.board.blackwin:
-            self.respond("black")
-        elif self.board.whitewin:
-            self.respond("white")
-        elif self.board.draw:
+        if self.board.get_empty_points().size == 0:
             self.respond("draw")
+            return
+        result = self.board.detect_five()
+        if result == BLACK:
+            self.respond("black")
+        elif result == WHITE:
+            self.respond("white")
         else:
             self.respond("unknown")
 
@@ -337,13 +338,20 @@ class GtpConnection:
         except AssertionError as ae:
             self.respond("Illegal move: {}, {}".format(args, str(ae)))
         except Exception as e:
-            self.respond("Error: {}".format(str(e)))
+            self.respond("illegal move: {}".format(str(e).replace('\'','')))
 
     def genmove_cmd(self, args: List[str]) -> None:
         """ 
         Modify this function for Assignment 1.
         Generate a move for color args[0] in {'b','w'}.
         """
+        result = self.board.detect_five()
+        if result == opponent(self.board.current_player):
+            self.respond("resign")
+            return
+        if self.board.get_empty_points().size == 0:
+            self.respond("pass")
+            return
         board_color = args[0].lower()
         color = color_to_int(board_color)
         move = self.go_engine.get_move(self.board, color)
@@ -426,4 +434,9 @@ def move_to_coord(point_str: str, board_size: int) -> Tuple[int, int]:
 def color_to_int(c: str) -> int:
     """convert character to the appropriate integer code"""
     color_to_int = {"b": BLACK, "w": WHITE, "e": EMPTY, "BORDER": BORDER}
-    return color_to_int[c]
+    try:
+        return color_to_int[c]
+    except:
+        raise KeyError("\"{}\" wrong color".format(c))
+    
+

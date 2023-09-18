@@ -49,14 +49,79 @@ class GoBoard(object):
         """
         assert 2 <= size <= MAXSIZE
         self.reset(size)
+        self.examine_rows_cols_diags()
+
+
+    def examine_rows_cols_diags(self):
+        #Basically this functions saves the entire board by dividing it into rows, columns and diagonals,
+        #this will be done by nested loop till it reached the border.
+        #The function will save the rows, columns and diagonals in a list.
+        #The function will be called after every move to check if there is a 5 in a row.
+        if self.size < 5:
+            return
+        # Calculate all rows, cols, and diags, examine 5-in-a-row
+        self.cols = []
+        self.rows = []
+        for i in range(1, self.size + 1):
+            current_row = []
+            start = self.row_start(i)
+            for pt in range(start, start + self.size):
+                current_row.append(pt)
+            self.rows.append(current_row)
+            
+            start = self.row_start(1) + i - 1
+            current_col = []
+            for pt in range(start, self.row_start(self.size) + i, self.NS):
+                current_col.append(pt)
+            self.cols.append(current_col)
+        
+        # Diagnal towards SE direction, from first row (1,1) to (1,n)
+        self.diags = []
+        start = self.row_start(1)
+        for i in range(start, start + self.size):
+            diag_SE = []
+            pt = i
+            while self.get_color(pt) == EMPTY:
+                diag_SE.append(pt)
+                pt += self.NS + 1
+            if len(diag_SE) >= 5:
+                self.diags.append(diag_SE)
+
+        # Diagnal towards SE and NE direction, starting from (2,1) to (n,1)
+        for i in range(start + self.NS, self.row_start(self.size) + 1, self.NS):
+            diag_SE = []
+            diag_NE = []
+            pt = i
+            while self.get_color(pt) == EMPTY:
+                diag_SE.append(pt)
+                pt += self.NS + 1
+            pt = i
+            while self.get_color(pt) == EMPTY:
+                diag_NE.append(pt)
+                pt += -1 * self.NS + 1
+            if len(diag_SE) >= 5:
+                self.diags.append(diag_SE)
+            if len(diag_NE) >= 5:
+                self.diags.append(diag_NE)
+
+        # diagnal towards NE direction, starting from (n,2) to (n,n)
+        start = self.row_start(self.size) + 1
+        for i in range(start, start + self.size):
+            diag_NE = []
+            pt = i
+            while self.get_color(pt) == EMPTY:
+                diag_NE.append(pt)
+                pt += -1 * self.NS + 1
+            if len(diag_NE) >=5:
+                self.diags.append(diag_NE)
+        assert len(self.rows) == self.size
+        assert len(self.cols) == self.size
+        assert len(self.diags) == (2 * (self.size - 5) + 1) * 2
 
     def reset(self, size: int) -> None:
         """
         Creates a start state, an empty board with given size.
         """
-        self.blackwin = False
-        self.whitewin = False
-        self.draw = False
         self.size: int = size
         self.NS: int = size + 1
         self.WE: int = 1
@@ -67,6 +132,7 @@ class GoBoard(object):
         self.maxpoint: int = board_array_size(size)
         self.board: np.ndarray[GO_POINT] = np.full(self.maxpoint, BORDER, dtype=GO_POINT)
         self._initialize_empty_points(self.board)
+        self.examine_rows_cols_diags()
 
     def copy(self) -> 'GoBoard':
         b = GoBoard(self.size)
@@ -94,15 +160,17 @@ class GoBoard(object):
         If this function returns True: still need to check more
         complicated cases such as suicide.
         """
-        assert is_black_white(color), "wrong color"
+        assert is_black_white(color)
         if point == PASS:
             return True
         # Could just return False for out-of-bounds, 
         # but it is better to know if this is called with an illegal point
-        assert self.pt(1, 1) <= point <= self.pt(self.size, self.size), "point not in range"
-        assert is_black_white_empty(self.board[point]), "point is occupied"
+        assert self.pt(1, 1) <= point <= self.pt(self.size, self.size)
+        assert is_black_white_empty(self.board[point])
         if self.board[point] != EMPTY:
             return False
+        # if point == self.ko_recapture:
+        #     return False
         return True
 
     def is_legal(self, point: GO_POINT, color: GO_COLOR) -> bool:
@@ -118,11 +186,8 @@ class GoBoard(object):
         return can_play_move
 
     def end_of_game(self) -> bool:
-        # TEMPORARY FIX SO GAME IS NOT OVER ON START
-        if self.blackwin or self.whitewin or self.draw:
-            return True
-        else:
-            return False
+        return self.last_move == PASS \
+        and self.last2_move == PASS
            
     def get_empty_points(self) -> np.ndarray:
         """
@@ -240,6 +305,7 @@ class GoBoard(object):
             return False
         # Special cases
         if point == PASS:
+            self.ko_recapture = NO_POINT
             self.current_player = opponent(color)
             self.last2_move = self.last_move
             self.last_move = point
@@ -279,6 +345,7 @@ class GoBoard(object):
                                 
 
                 # print(points_to_capture)
+
         # opp_color = opponent(color)
         # in_enemy_eye = self._is_surrounded(point, opp_color)
         # single_captures = []
@@ -288,6 +355,11 @@ class GoBoard(object):
         #         single_capture = self._detect_and_process_capture(nb)
         #         if single_capture != NO_POINT:
         #             single_captures.append(single_capture)
+        # block = self._block_of(point)
+        # if not self._has_liberty(block):  # undo suicide move
+        #     self.board[point] = EMPTY
+        #     return False
+        # self.ko_recapture = NO_POINT
         # if in_enemy_eye and len(single_captures) == 1:
         #     self.ko_recapture = single_captures[0]
         self.current_player = opponent(color)
@@ -325,3 +397,35 @@ class GoBoard(object):
         if self.last2_move != NO_POINT and self.last2_move != PASS:
             board_moves.append(self.last2_move)
         return board_moves
+    def detect_five(self):
+        """
+        Returns black, white or empty if five is detected in any directions
+        """
+        for r in self.rows:
+            result = self.has_five_in_lists(r)
+            if result != EMPTY:
+                return result
+        for c in self.cols:
+            result = self.has_five_in_lists(c)
+            if result != EMPTY:
+                return result
+        for d in self.diags:
+            result = self.has_five_in_lists(d)
+            if result != EMPTY:
+                return result
+        return EMPTY
+    
+    def has_five_in_lists(self, list):
+        previous = BORDER
+        counter = 1
+        for stone in list:
+            if self.get_color(stone) == previous:
+                counter += 1
+            else:
+                counter = 1
+                previous = self.get_color(stone)
+            if counter == 5 and previous != EMPTY:
+                return previous
+        return EMPTY
+
+
